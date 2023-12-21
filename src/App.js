@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { GeoWars } from './pages/GeoWars';
+import { GeoWars } from './pages/GeoWars/GeoWars';
 import { Main } from './pages/Main';
-import { Bouncing } from './pages/Bouncing';
+import { Bouncing } from './pages/Bouncing/Bouncing';
 
 
 function App() {
