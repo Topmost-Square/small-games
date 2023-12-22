@@ -46,9 +46,11 @@ export class EntityManager {
         
         const entity = new Entity(newEntityId, tag);
 
-        this.toAdd.push(entity);
+        // this.toAdd.push(entity);
 
         // todo: use tag to push entity to map
+        this.entities = [...this.entities, entity];
+        this.entityMap[tag] = [...this.entityMap[tag], entity]
 
         return entity;
     }

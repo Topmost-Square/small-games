@@ -8,7 +8,6 @@ export class Game {
     cnv = null;
     ctx = null;
 
-    entities = [];
     entityManager = new EntityManager();
 
     text = '';
@@ -53,13 +52,18 @@ export class Game {
 
     sRender() {
         this.ctx.clearRect(0, 0, this.cnv.width, this.cnv.height);
+        
+        if (this.entityManager.entities.length) {
+            for (const e of this.entityManager.entities) {
 
-        for (const e in this.entities) {
-
-            // todo: DRAW e.cShape with e.cTransform.pos.x & e.cTransform.pos.y
-            // todo: rotate e.cShape with e.cTransform.angle += 1.0f
-
+                console.log(e, 'e of entities in GAME')
+    
+                // todo: DRAW e.cShape with e.cTransform.pos.x & e.cTransform.pos.y
+                // todo: rotate e.cShape with e.cTransform.angle += 1.0f
+    
+            }
         }
+        
     }
 
     sEnemySpawner() {
@@ -83,8 +87,8 @@ export class Game {
         const my = this.cnv.height / 2.0;
 
         entity.cTransform = new CTransform(
-            Vec2(mx, my),
-            Vec2(0, 0),
+            new Vec2(mx, my),
+            new Vec2(0, 0),
             0.0
         );
 
@@ -101,8 +105,6 @@ export class Game {
 
         entity.cInput = new CInput();
 
-        this.entities = [...this.entities, entity];
-
         this.player = entity;
     }
 
@@ -112,13 +114,13 @@ export class Game {
         const ex = Math.random(this.cnv.width);
         const ey = Math.random(this.cnv.height);
         
-        entity.cTransform = CTransform(
-            Vec2(ex, ey),
-            Vec2(0.0, 0.0),
+        entity.cTransform = new CTransform(
+            new Vec2(ex, ey),
+            new Vec2(0.0, 0.0),
             0.0
         );
 
-        entity.cShape = CShape(
+        entity.cShape = new CShape(
             16.0, 
             3,
             `rgba(255, 255, 255, 1)`,
@@ -138,7 +140,7 @@ export class Game {
 
         bullet.cTransform = new CTransform(
             mousePosVec2,
-            Vec2(0,0),
+            new Vec2(0,0),
             0
         );
         bullet.cShape = new CShape(
@@ -153,16 +155,16 @@ export class Game {
     spawnSpecialWeapon(entity) {}
 
     run() {
-        if (this.entities.length) {
-            this.entities.forEach(
-                entity => entity.update()
-            );
-        }
+        // if (this.entities.length) {
+        //     this.entities.forEach(
+        //         entity => entity.update()
+        //     );
+        // }
 
-        this.sEnemySpawner();
-        this.sMovement();
-        this.sCollision();
-        this.sUserInput();
+        // this.sEnemySpawner();
+        // this.sMovement();
+        // this.sCollision();
+        // this.sUserInput();
         this.sRender();
 
         this.currentFrame++;

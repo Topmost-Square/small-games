@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { Game } from "./classes/Game";
 
 export const GeoWars = () => {
     let canvasRef = useRef(null);
@@ -10,11 +11,16 @@ export const GeoWars = () => {
         cnv.width = window.innerWidth;
         cnv.height = window.innerHeight;
 
+        const game = new Game();
+        game.init(cnv, ctx);
+
         const animate = () => {
             requestAnimationFrame(animate);
         
             if (ctx && cnv) {
                 ctx.clearRect(0, 0, cnv.width, cnv.height);
+                
+                game.run();
             }
             
         }
