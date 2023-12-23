@@ -50,17 +50,38 @@ export class Game {
 
     sLifespan() {}
 
+    drawPolygon(e) {
+        this.ctx.beginPath();
+        this.ctx.moveTo(
+            e.cTransform.pos.x + e.cShape.radius * Math.cos(0), 
+            e.cTransform.pos.y + e.cShape.radius * Math.sin(0)
+        );          
+         
+        for (var i = 1; i <= e.cShape.points; i += 1) {
+            this.ctx.lineTo(
+                e.cTransform.pos.x + e.cShape.radius * Math.cos(i * 2 * Math.PI / e.cShape.points), 
+                e.cTransform.pos.y + e.cShape.radius * Math.sin(i * 2 * Math.PI / e.cShape.points)
+            );
+        }
+         
+        this.ctx.strokeStyle = "#000000";
+        this.ctx.lineWidth = 1;
+        this.ctx.stroke();
+    }
+
+    rotatePolygon(e) {
+        this.ctx.translate(e.cTransform.pos.x, e.cTransform.pos.y);
+        this.ctx.rotate(e.cTransform.angle);
+        this.ctx.translate(-e.cTransform.pos.x, -e.cTransform.pos.y);
+    }
+
     sRender() {
         this.ctx.clearRect(0, 0, this.cnv.width, this.cnv.height);
-        
-        if (this.entityManager.entities.length) {
-            for (const e of this.entityManager.entities) {
 
-                console.log(e, 'e of entities in GAME')
-    
-                // todo: DRAW e.cShape with e.cTransform.pos.x & e.cTransform.pos.y
-                // todo: rotate e.cShape with e.cTransform.angle += 1.0f
-    
+        if (this.entityManager.entities.length && this.ctx) {
+            for (const e of this.entityManager.entities) {
+                this.drawPolygon(e);
+                this.rotatePolygon(e);
             }
         }
         
@@ -89,7 +110,7 @@ export class Game {
         entity.cTransform = new CTransform(
             new Vec2(mx, my),
             new Vec2(0, 0),
-            0.0
+            1.0
         );
 
         // 32 radius
@@ -100,7 +121,7 @@ export class Game {
             8,
             `rgba(255, 255, 255, 1)`,
             `rgba(255, 255, 255, 1)`,
-            4.0
+            10
         );
 
         entity.cInput = new CInput();
