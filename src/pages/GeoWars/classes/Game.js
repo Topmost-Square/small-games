@@ -21,9 +21,56 @@ export class Game {
     paused = false;
     running = true;
 
+    keyDownListener(e) {
+        switch (e.key) {
+            case 'w':
+                this.player.cInput.up = true;
+                break;
+            case 'a':
+                this.player.cInput.left = true;
+                break;
+            case 's':
+                this.player.cInput.down = true;
+                break;
+            case 'd':
+                this.player.cInput.right = true;
+                break;
+            case 'p':
+                this.player.cInput.shoot = true;
+                break;
+            default:
+                return;
+        }
+    }
+
+    keyUpListener(e) {
+        switch (e.key) {
+            case 'w':
+                this.player.cInput.up = false;
+                break;
+            case 'a':
+                this.player.cInput.left = false;
+                break;
+            case 's':
+                this.player.cInput.down = false;
+                break;
+            case 'd':
+                this.player.cInput.right = false;
+                break;
+            case 'p':
+                this.player.cInput.shoot = false;
+                break;
+            default:
+                return;
+        }
+    }
+
     init(cnv, ctx) {
         this.cnv = cnv;
         this.ctx = ctx;
+
+        window.addEventListener('keydown', e => this.keyDownListener(e));
+        window.addEventListener('keyup', e => this.keyUpListener(e));
 
         // init key listeners
         // wasd - moving
@@ -35,15 +82,31 @@ export class Game {
 
     update() {}
 
-    sMovement() {
+    playerMovement() {
         this.player.cTransform.velocity = new Vec2(0,0);
 
         if (this.player.cInput.up) {
-            this.player.cTransform.velocity.y = -5;
+            this.player.cTransform.velocity.y = -5.0;
+        }
+
+        if (this.player.cInput.down) {
+            this.player.cTransform.velocity.y = 5.0;
+        }
+
+        if (this.player.cInput.left) {
+            this.player.cTransform.velocity.x = -5.0;
+        }
+
+        if (this.player.cInput.right) {
+            this.player.cTransform.velocity.x = 5.0;
         }
 
         this.player.cTransform.pos.x += this.player.cTransform.velocity.x;
         this.player.cTransform.pos.y += this.player.cTransform.velocity.y;
+    }
+
+    sMovement() {
+        this.playerMovement();
     }
 
     sUserInput() {}
@@ -81,7 +144,7 @@ export class Game {
         if (this.entityManager.entities.length && this.ctx) {
             for (const e of this.entityManager.entities) {
                 this.drawPolygon(e);
-                this.rotatePolygon(e);
+                // this.rotatePolygon(e);
             }
         }
         
@@ -183,7 +246,7 @@ export class Game {
         // }
 
         // this.sEnemySpawner();
-        // this.sMovement();
+        this.sMovement();
         // this.sCollision();
         // this.sUserInput();
         this.sRender();
