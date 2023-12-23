@@ -57,12 +57,20 @@ export class Game {
             case 'd':
                 this.player.cInput.right = false;
                 break;
-            case 'p':
-                this.player.cInput.shoot = false;
-                break;
             default:
                 return;
         }
+    }
+
+    mouseDownListener(e) {
+        const { screenX, screenY, clientX, clientY } = e;
+
+        this.player.cInput.shoot = true;
+        this.player.cInput.mousePosition = new Vec2(clientX, clientY);
+    }
+
+    mouseUpListener(e) {
+        this.player.cInput.shoot = false;
     }
 
     init(cnv, ctx) {
@@ -71,6 +79,9 @@ export class Game {
 
         window.addEventListener('keydown', e => this.keyDownListener(e));
         window.addEventListener('keyup', e => this.keyUpListener(e));
+
+        window.addEventListener('mousedown', e => this.mouseDownListener(e));
+        window.addEventListener('mouseup', e => this.mouseUpListener(e));
 
         // init key listeners
         // wasd - moving
@@ -109,7 +120,14 @@ export class Game {
         this.playerMovement();
     }
 
-    sUserInput() {}
+    sUserInput() {
+        if (this.player.cInput.shoot) {
+            this.spawnBullet(
+                this.player.pos, 
+                this.player.cInput.mousePosition
+            );
+        }
+    }
 
     sLifespan() {}
 
@@ -140,6 +158,8 @@ export class Game {
 
     sRender() {
         this.ctx.clearRect(0, 0, this.cnv.width, this.cnv.height);
+
+        // console.log(this.entityManager.entities, 'this.entityManager.entities')
 
         if (this.entityManager.entities.length && this.ctx) {
             for (const e of this.entityManager.entities) {
@@ -219,8 +239,11 @@ export class Game {
 
     }
 
-    spawnBullet(entity, mousePosVec2) {
+    spawnBullet(shooterPos, mousePosVec2) {
         const bullet = this.entityManager.addEntity('bullet');
+
+        //todo: use user's position as start point of shoot
+        // shooterPos -> x,y
 
         bullet.cTransform = new CTransform(
             mousePosVec2,
@@ -233,7 +256,9 @@ export class Game {
             `rgba(255, 255, 255, 1)`,
             `rgba(255, 255, 255, 1)`,
             2
-        )
+        );
+
+
     }
 
     spawnSpecialWeapon(entity) {}
@@ -248,7 +273,7 @@ export class Game {
         // this.sEnemySpawner();
         this.sMovement();
         // this.sCollision();
-        // this.sUserInput();
+        this.sUserInput();
         this.sRender();
 
         this.currentFrame++;

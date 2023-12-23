@@ -7,8 +7,8 @@ export class EntityManager {
     entities = [];
     entityMap = {
         player: [],
-        bullets: [],
-        enemies: []
+        bullet: [],
+        enemy: []
     };
     toAdd = [];
 
