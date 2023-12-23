@@ -65,13 +65,13 @@ export class Game {
     mouseDownListener(e) {
         const { screenX, screenY, clientX, clientY } = e;
 
-        this.player.cInput.shoot = true;
-        this.player.cInput.mousePosition = new Vec2(clientX, clientY);
+        this.spawnBullet(
+            this.player.cTransform.pos, 
+            new Vec2(clientX, clientY)
+        );
     }
 
-    mouseUpListener(e) {
-        this.player.cInput.shoot = false;
-    }
+    mouseUpListener(e) {}
 
     init(cnv, ctx) {
         this.cnv = cnv;
@@ -82,11 +82,6 @@ export class Game {
 
         window.addEventListener('mousedown', e => this.mouseDownListener(e));
         window.addEventListener('mouseup', e => this.mouseUpListener(e));
-
-        // init key listeners
-        // wasd - moving
-        // w:
-        // player->cInput->up->true
 
         this.spawnPlayer();
     }
@@ -116,18 +111,19 @@ export class Game {
         this.player.cTransform.pos.y += this.player.cTransform.velocity.y;
     }
 
-    sMovement() {
-        this.playerMovement();
-    }
-
-    sUserInput() {
-        if (this.player.cInput.shoot) {
-            this.spawnBullet(
-                this.player.pos, 
-                this.player.cInput.mousePosition
-            );
+    bulletMovement() {
+        for (const b of this.entityManager.getEntitiesByTag('bullet')) {
+            b.cTransform.pos.x += b.cTransform.velocity.x;
+            b.cTransform.pos.y += b.cTransform.velocity.y;
         }
     }
+
+    sMovement() {
+        this.playerMovement();
+        this.bulletMovement();
+    }
+
+    sUserInput() {}
 
     sLifespan() {}
 
@@ -159,15 +155,12 @@ export class Game {
     sRender() {
         this.ctx.clearRect(0, 0, this.cnv.width, this.cnv.height);
 
-        // console.log(this.entityManager.entities, 'this.entityManager.entities')
-
         if (this.entityManager.entities.length && this.ctx) {
             for (const e of this.entityManager.entities) {
                 this.drawPolygon(e);
                 // this.rotatePolygon(e);
             }
         }
-        
     }
 
     sEnemySpawner() {
@@ -242,12 +235,27 @@ export class Game {
     spawnBullet(shooterPos, mousePosVec2) {
         const bullet = this.entityManager.addEntity('bullet');
 
-        //todo: use user's position as start point of shoot
-        // shooterPos -> x,y
+        const d = mousePosVec2.sub(shooterPos);
+
+        const l = Math.sqrt(Math.pow(d.x, 2) + Math.pow(d.y, 2));
+
+        const n = d.divide(l);
+
+        // - bullet shoot towards mouse
+        // m - mouse
+        // p - player
+
+        // D = (mx-px, my-py)
+        // D has some length L we want it to be S
+        // Normalize D, 
+        // L = sqrt(x*x + y*y)
+        // N = (D.x / L, D.y / L) now has L = 1
+
+        const shooterPosition = new Vec2(shooterPos.x, shooterPos.y);
 
         bullet.cTransform = new CTransform(
-            mousePosVec2,
-            new Vec2(0,0),
+            shooterPosition,
+            n,
             0
         );
         bullet.cShape = new CShape(
