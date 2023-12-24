@@ -107,6 +107,22 @@ export class Game {
             this.player.cTransform.velocity.x = 5.0;
         }
 
+        if (this.player.cTransform.pos.x - this.player.cShape.radius <= 0) {
+            this.player.cTransform.pos.x = this.player.cShape.radius;
+        }
+
+        if (this.player.cTransform.pos.y - this.player.cShape.radius <= 0) {
+            this.player.cTransform.pos.y = this.player.cShape.radius;
+        }
+
+        if (this.player.cTransform.pos.x + this.player.cShape.radius >= this.cnv.width) {
+            this.player.cTransform.pos.x = this.cnv.width - this.player.cShape.radius
+        }
+
+        if (this.player.cTransform.pos.y + this.player.cShape.radius >= this.cnv.height) {
+            this.player.cTransform.pos.y = this.cnv.height - this.player.cShape.radius;
+        }
+
         this.player.cTransform.pos.x += this.player.cTransform.velocity.x;
         this.player.cTransform.pos.y += this.player.cTransform.velocity.y;
     }
@@ -118,9 +134,34 @@ export class Game {
         }
     }
 
+    enemyMovement() {
+        for (const e of this.entityManager.getEntitiesByTag('enemy')) {
+            e.cTransform.pos.x += e.cTransform.velocity.x;
+            e.cTransform.pos.y += e.cTransform.velocity.y;
+
+            if (e.cTransform.pos.x - e.cShape.radius <= 0) {
+                e.cTransform.velocity.x = -e.cTransform.velocity.x
+            }
+
+            if (e.cTransform.pos.y - e.cShape.radius <= 0) {
+                e.cTransform.velocity.y = -e.cTransform.velocity.y
+            }
+
+            if (e.cTransform.pos.x + e.cShape.radius >= this.cnv.width) {
+                e.cTransform.velocity.x = -e.cTransform.velocity.x
+            }
+
+            if (e.cTransform.pos.y + e.cShape.radius >= this.cnv.height) {
+                e.cTransform.velocity.y = -e.cTransform.velocity.y
+            }
+        }
+    }
+
     sMovement() {
         this.playerMovement();
         this.bulletMovement();
+
+        this.enemyMovement();
     }
 
     sUserInput() {}
@@ -141,7 +182,9 @@ export class Game {
             );
         }
          
-        this.ctx.strokeStyle = "#000000";
+        this.ctx.strokeStyle = e.cShape.outColor;
+        this.ctx.fillStyle = e.cShape.fillColor;
+        this.ctx.fill();
         this.ctx.lineWidth = 1;
         this.ctx.stroke();
     }
@@ -164,7 +207,9 @@ export class Game {
     }
 
     sEnemySpawner() {
-        this.spawnEnemy();
+        if (this.currentFrame - this.lastEnemySpawnTime >= 60) {
+            this.spawnEnemy();
+        }
     }
 
     sCollision() {
@@ -208,20 +253,25 @@ export class Game {
     spawnEnemy() {
         const entity = this.entityManager.addEntity('enemy');
 
-        const ex = Math.random(this.cnv.width);
-        const ey = Math.random(this.cnv.height);
+        const ex = Math.random() * this.cnv.width;
+        const ey = Math.random() * this.cnv.height;
+
+        const sx = Math.random() < .5 ? - 1 : 1 * Math.random() * 3;
+        const sy = Math.random() < .5 ? - 1 : 1 * Math.random() * 3;
         
         entity.cTransform = new CTransform(
             new Vec2(ex, ey),
-            new Vec2(0.0, 0.0),
+            new Vec2(sx, sy),
             0.0
         );
 
+        const vertices = Math.floor(Math.random() * 8) + 3
+
         entity.cShape = new CShape(
-            16.0, 
-            3,
-            `rgba(255, 255, 255, 1)`,
-            `rgba(255, 255, 255, 1)`,
+            32.0, 
+            vertices,
+            `rgba(0, 0, 0, 1)`,
+            `rgba(255, 0, 0, 1)`,
             4.0
         );
 
@@ -239,7 +289,7 @@ export class Game {
 
         const l = Math.sqrt(Math.pow(d.x, 2) + Math.pow(d.y, 2));
 
-        const n = d.divide(l);
+        const n = d.divide(l).multiply(5);
 
         // - bullet shoot towards mouse
         // m - mouse
@@ -278,7 +328,7 @@ export class Game {
         //     );
         // }
 
-        // this.sEnemySpawner();
+        this.sEnemySpawner();
         this.sMovement();
         // this.sCollision();
         this.sUserInput();
