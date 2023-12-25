@@ -220,6 +220,22 @@ export class Game {
                 // delete bullet
             }
         }
+
+        if (this.entityManager.getEntitiesByTag('enemy').length) {
+            for (const e of this.entityManager.getEntitiesByTag('enemy')) {               
+                const d = this.player.cTransform.pos.sub(e.cTransform.pos);
+    
+                const l = Math.sqrt(Math.pow(d.x, 2) + Math.pow(d.y, 2));
+    
+                const enemyRad = e.cShape.radius;
+                const playerRad = this.player.cShape.radius;
+    
+                if (l < enemyRad + playerRad) {
+                    this.entityManager.resetEntities();
+                    this.spawnPlayer();
+                }
+            }
+        }
     }
 
     spawnPlayer() {
@@ -330,7 +346,7 @@ export class Game {
 
         this.sEnemySpawner();
         this.sMovement();
-        // this.sCollision();
+        this.sCollision();
         this.sUserInput();
         this.sRender();
 

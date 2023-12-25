@@ -14,6 +14,15 @@ export class EntityManager {
 
     init() {}
 
+    resetEntities() {
+        this.entities = [];
+        this.entityMap = {
+            player: [],
+            bullet: [],
+            enemy: []
+        };
+    }
+
     update() {
         this.removeDeadEntities();
 
