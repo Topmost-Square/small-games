@@ -1,4 +1,5 @@
 import { CInput } from "./components/CInput";
+import { CLifespan } from "./components/CLifespan";
 import { CShape } from "./components/CShape";
 import { CTransform } from "./components/CTransform";
 import { EntityManager } from "./EntityManager";
@@ -131,6 +132,16 @@ export class Game {
         for (const b of this.entityManager.getEntitiesByTag('bullet')) {
             b.cTransform.pos.x += b.cTransform.velocity.x;
             b.cTransform.pos.y += b.cTransform.velocity.y;
+
+            b.cLifespan.reduce();
+
+            if (b.cLifespan.remaining <= 0) {
+
+                console.log('should remove bullet')
+
+                this.entityManager.removeEntity(b.id);
+                this.entityManager.removeEntityByTag('bullet', b.id);
+            }
         }
     }
 
@@ -350,6 +361,7 @@ export class Game {
             n,
             0
         );
+
         bullet.cShape = new CShape(
             10,
             8,
@@ -358,7 +370,7 @@ export class Game {
             2
         );
 
-
+        bullet.cLifespan = new CLifespan(90);
     }
 
     spawnSpecialWeapon(entity) {}
