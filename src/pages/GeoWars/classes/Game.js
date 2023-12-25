@@ -265,7 +265,7 @@ export class Game {
                         const points = e.cShape.points;
                         const radius = e.cShape.radius / 2;
                         const angleSize = 360 / points;
-                        const newScore = e.CScore ? e.CScore.score * 2 : 0;
+                        const newScore = e.cScore.score * 2;
 
                         this.entityManager.removeEntity(bulletId);
                         this.entityManager.removeEntity(enemyId);
