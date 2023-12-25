@@ -33,6 +33,29 @@ export class EntityManager {
         this.toAdd = [];
     }
 
+    setEntities(entities) {
+        this.entities = entities
+    }
+
+    setEntityMap(entityMap) {
+        this.entityMap = entityMap
+    }
+
+    removeEntity(id) {
+        const newEntities = this.entities.filter(entity => entity.id !== id);
+        this.setEntities(newEntities);
+    }
+
+    removeEntityByTag(tag, id) {
+        const entityMapPart = this.entityMap[tag];
+        const newEntityMapPart = entityMapPart.filter(entity => entity.id !== id);
+        const newEntityMap = {
+            ...this.entityMap,
+            [tag]: newEntityMapPart
+        };
+        this.setEntityMap(newEntityMap);
+    }
+
     removeDeadEntities() {
         // remove from both
         // this.entities
@@ -50,8 +73,14 @@ export class EntityManager {
             // and new entities map
     }
 
+    setNumberOfItems(numberOfEntities) {
+        this.numberOfEntities = numberOfEntities;
+    }
+
     addEntity(tag) {
         const newEntityId = this.getNumberOfEntities() + 1;
+
+        this.numberOfEntities = newEntityId;
         
         const entity = new Entity(newEntityId, tag);
 

@@ -213,13 +213,37 @@ export class Game {
     }
 
     sCollision() {
-        for (const b in this.entityManager.getEntitiesByTag('bullet')) {
-            for (const e in this.entityManager.getEntitiesByTag('enemy')) {
-                // delete enemy
-                // score
-                // delete bullet
+        if (
+            this.entityManager.getEntitiesByTag('bullet').length && 
+            this.entityManager.getEntitiesByTag('enemy').length
+        ) {
+            for (const b of this.entityManager.getEntitiesByTag('bullet')) {
+                for (const e of this.entityManager.getEntitiesByTag('enemy')) {
+                    // delete enemy
+                    // score
+                    // delete bullet
+
+                    const d = b.cTransform.pos.sub(e.cTransform.pos);
+    
+                    const l = Math.sqrt(Math.pow(d.x, 2) + Math.pow(d.y, 2));
+        
+                    const enemyRad = e.cShape.radius;
+                    const bulletRad = b.cShape.radius;
+
+                    if (l < enemyRad + bulletRad) {
+                        const bulletId = b.id;
+                        const enemyId = e.id;
+
+                        this.entityManager.removeEntity(bulletId);
+                        this.entityManager.removeEntity(enemyId);
+
+                        this.entityManager.removeEntityByTag('bullet', bulletId);
+                        this.entityManager.removeEntityByTag('enemy', enemyId);
+                    }
+                }
             }
         }
+        
 
         if (this.entityManager.getEntitiesByTag('enemy').length) {
             for (const e of this.entityManager.getEntitiesByTag('enemy')) {               
@@ -232,6 +256,8 @@ export class Game {
     
                 if (l < enemyRad + playerRad) {
                     this.entityManager.resetEntities();
+                    this.entityManager.setNumberOfItems(0);
+
                     this.spawnPlayer();
                 }
             }
