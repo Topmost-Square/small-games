@@ -1,5 +1,6 @@
 import { CInput } from "./components/CInput";
 import { CLifespan } from "./components/CLifespan";
+import { CScore } from "./components/CScore";
 import { CShape } from "./components/CShape";
 import { CTransform } from "./components/CTransform";
 import { EntityManager } from "./EntityManager";
@@ -136,9 +137,6 @@ export class Game {
             b.cLifespan.reduce();
 
             if (b.cLifespan.remaining <= 0) {
-
-                console.log('should remove bullet')
-
                 this.entityManager.removeEntity(b.id);
                 this.entityManager.removeEntityByTag('bullet', b.id);
             }
@@ -147,6 +145,16 @@ export class Game {
 
     enemyMovement() {
         for (const e of this.entityManager.getEntitiesByTag('enemy')) {
+
+            if (e.cLifespan) {
+                e.cLifespan.reduce();
+
+                if (e.cLifespan.remaining <= 0) {
+                    this.entityManager.removeEntity(e.id);
+                    this.entityManager.removeEntityByTag('enemy', e.id);
+                }
+            }
+
             e.cTransform.pos.x += e.cTransform.velocity.x;
             e.cTransform.pos.y += e.cTransform.velocity.y;
 
@@ -215,6 +223,10 @@ export class Game {
                 // this.rotatePolygon(e);
             }
         }
+
+        this.ctx.fillStyle = 'white';
+        this.ctx.font = "30px Arial";
+        this.ctx.fillText(`Score: ${this.score}`, 100, 100);
     }
 
     sEnemySpawner() {
@@ -241,15 +253,35 @@ export class Game {
                     const enemyRad = e.cShape.radius;
                     const bulletRad = b.cShape.radius;
 
-                    if (l < enemyRad + bulletRad) {
+                    if (l < enemyRad + bulletRad && e.active) {
+                        e.active = false;
+
+                        this.score = this.score + e.cScore.score;
+
                         const bulletId = b.id;
                         const enemyId = e.id;
+
+                        const launchPoint = e.cTransform.pos;
+                        const points = e.cShape.points;
+                        const radius = e.cShape.radius / 2;
+                        const angleSize = 360 / points;
+                        const newScore = e.CScore ? e.CScore.score * 2 : 0;
 
                         this.entityManager.removeEntity(bulletId);
                         this.entityManager.removeEntity(enemyId);
 
                         this.entityManager.removeEntityByTag('bullet', bulletId);
-                        this.entityManager.removeEntityByTag('enemy', enemyId);
+                        this.entityManager.removeEntityByTag('enemy', enemyId); 
+
+                        this.spawnSmallEnemies(
+                            launchPoint, 
+                            points,
+                            radius,
+                            angleSize,
+                            newScore
+                        );
+
+                        
                     }
                 }
             }
@@ -266,6 +298,7 @@ export class Game {
                 const playerRad = this.player.cShape.radius;
     
                 if (l < enemyRad + playerRad) {
+                    this.score = 0;
                     this.entityManager.resetEntities();
                     this.entityManager.setNumberOfItems(0);
 
@@ -328,11 +361,49 @@ export class Game {
             4.0
         );
 
+        entity.cScore = new CScore(100);
+
         this.lastEnemySpawnTime = this.currentFrame;
     }
 
-    spawnSmallEnemies(entity) {
+    spawnSmallEnemies(
+        launchPoint, 
+        points,
+        radius,
+        angleSize,
+        newScore
+    ) {    
+        let i = 0;
+        while (i < points) {
+            const entity = this.entityManager.addEntity('enemy');
 
+            const angle = (i+1) * angleSize;
+
+            //speed angle
+            const sx = Math.cos(angle);
+            const sy = Math.sin(angle);
+
+            entity.cTransform = new CTransform(
+                new Vec2(launchPoint.x, launchPoint.y),
+                new Vec2(sx, sy),
+                0.0
+            );
+
+            entity.cShape = new CShape(
+                radius, 
+                points,
+                `rgba(0, 0, 0, 1)`,
+                `rgba(255, 0, 0, 1)`,
+                4.0
+            );
+
+            entity.cLifespan = new CLifespan(60);
+            entity.cScore = new CScore(newScore);
+
+            i++;
+        }
+    
+    
     }
 
     spawnBullet(shooterPos, mousePosVec2) {
